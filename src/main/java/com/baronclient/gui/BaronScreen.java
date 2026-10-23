@@ -53,6 +53,7 @@ public class BaronScreen extends Screen {
             }).dimensions(innerLeft + i * catWidth, catY, catWidth - 4, 20).build());
         }
         rebuildModuleButtons();
+        if (selected != null) initSettingsButtons();
     }
 
     private int panelLeft() { return Math.max(12, (width - Math.min(760, width - 24)) / 2); }
@@ -116,6 +117,9 @@ public class BaronScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("CYCLE COLOUR"),
                 b -> { selected.cycleAppearance(); ModuleManager.save(); init(); })
                 .dimensions(left + (w + 4) * 2, y, w, 22).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal(selected.showBackground ? "BG: ON" : "BG: OFF"),
+                b -> { selected.toggleBackground(); ModuleManager.save(); init(); })
+                .dimensions(left, y - 25, w, 22).build());
     }
 
     @Override
