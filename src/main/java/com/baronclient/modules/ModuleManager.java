@@ -9,10 +9,14 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.HashSet;
+import java.util.Set;
+import org.lwjgl.glfw.GLFW;
 
 public final class ModuleManager {
     private static final List<Module> modules = new ArrayList<>();
     private static Path configPath;
+    private static final Set<Integer> heldKeys = new HashSet<>();
 
     private ModuleManager() {}
 
@@ -36,7 +40,26 @@ public final class ModuleManager {
     public static Module get(String name) {
         return modules.stream().filter(m -> m.name.equals(name)).findFirst().orElse(null);
     }
-    public static void tick(MinecraftClient client) {}
+    public static void tick(MinecraftClient client) {
+        if (client == null || client.getWindow() == null || client.currentScreen != null) {
+            heldKeys.clear();
+            return;
+        }
+        Set<Integer> nowHeld = new HashSet<>();
+        long window = client.getWindow().getHandle();
+        for (Module m : modules) {
+            if (m.keyCode <= 0) continue;
+            if (GLFW.glfwGetKey(window, m.keyCode) == GLFW.GLFW_PRESS) {
+                nowHeld.add(m.keyCode);
+                if (!heldKeys.contains(m.keyCode)) {
+                    m.toggle();
+                    save();
+                }
+            }
+        }
+        heldKeys.clear();
+        heldKeys.addAll(nowHeld);
+    }
 
     public static void save() {
         if (configPath == null) return;
@@ -47,6 +70,7 @@ public final class ModuleManager {
             p.setProperty(key + ".scale", Float.toString(m.scale));
             p.setProperty(key + ".color", Integer.toHexString(m.accentColor));
             p.setProperty(key + ".background", Boolean.toString(m.showBackground));
+            p.setProperty(key + ".keyCode", Integer.toString(m.keyCode));
         }
         try {
             Files.createDirectories(configPath.getParent());
@@ -67,6 +91,7 @@ public final class ModuleManager {
                 try { m.scale = Math.max(0.5f, Math.min(2.0f, Float.parseFloat(p.getProperty(key + ".scale", "1.0")))); } catch (NumberFormatException ignored) {}
                 try { m.accentColor = (int) Long.parseLong(p.getProperty(key + ".color", Integer.toHexString(m.accentColor)), 16); } catch (NumberFormatException ignored) {}
                 m.showBackground = Boolean.parseBoolean(p.getProperty(key + ".background", "true"));
+                try { m.keyCode = Integer.parseInt(p.getProperty(key + ".keyCode", "0")); } catch (NumberFormatException ignored) {}
             }
         } catch (IOException ignored) {}
     }
