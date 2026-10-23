@@ -3,6 +3,7 @@ package com.baronclient.gui;
 import com.baronclient.modules.Module;
 import com.baronclient.modules.ModuleManager;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -168,7 +169,8 @@ public class BaronScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
+        int keyCode = input.key();
         if (waitingForKey && selected != null) {
             selected.keyCode = keyCode == GLFW.GLFW_KEY_ESCAPE ? 0 : keyCode;
             waitingForKey = false;
@@ -176,7 +178,7 @@ public class BaronScreen extends Screen {
             init();
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     @Override
