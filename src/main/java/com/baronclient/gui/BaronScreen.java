@@ -37,6 +37,10 @@ public class BaronScreen extends Screen {
         int top = Math.max(12, height / 2 - Math.min(260, height / 2 - 8));
         int innerLeft = panelLeft + 16;
 
+        addDrawableChild(ButtonWidget.builder(Text.literal("HUD EDITOR"),
+                b -> { if (client != null) client.setScreen(new HudEditorScreen()); })
+                .dimensions(panelLeft + panelWidth - 286, top + 12, 120, 22).build());
+
         addDrawableChild(ButtonWidget.builder(Text.literal(compact ? "LAYOUT: COMPACT" : "LAYOUT: FULL"),
                 b -> { compact = !compact; scroll = 0; init(); })
                 .dimensions(panelLeft + panelWidth - 160, top + 12, 144, 22).build());
