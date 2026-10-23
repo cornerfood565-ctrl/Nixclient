@@ -80,12 +80,12 @@ public final class BaronHud {
         int drawX = m != null && m.hudX >= 0 ? m.hudX : x;
         int drawY = m != null && m.hudY >= 0 ? m.hudY : y;
         float scale = m == null ? 1.0f : m.scale;
-        draw.getMatrices().push();
+        draw.getMatrices().pushMatrix();
         draw.getMatrices().translate(drawX, drawY);
         draw.getMatrices().scale(scale, scale);
         if (m != null && m.showBackground) draw.fill(-3, -2, 128, 10, 0x990C0C10);
         draw.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, Text.literal(text), 0, 0, color);
-        draw.getMatrices().pop();
+        draw.getMatrices().popMatrix();
         return y + 13;
     }
 
