@@ -1,25 +1,112 @@
 package com.baronclient.hud;
 
+import com.baronclient.modules.Module;
 import com.baronclient.modules.ModuleManager;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
 
 public final class BaronHud {
+    private static final Deque<Long> leftClicks = new ArrayDeque<>();
+    private static final Deque<Long> rightClicks = new ArrayDeque<>();
+    private static boolean leftDown, rightDown;
+
+    private BaronHud() {}
+
     public static void init() {
         HudRenderCallback.EVENT.register((draw, tickDelta) -> render(draw));
+        ClientTickEvents.END_CLIENT_TICK.register(BaronHud::pollClicks);
     }
+
+    private static void pollClicks(MinecraftClient c) {
+        if (c.getWindow() == null || c.currentScreen != null) {
+            leftDown = false;
+            rightDown = false;
+            return;
+        }
+        long window = c.getWindow().getHandle();
+        boolean l = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_1) == GLFW.GLFW_PRESS;
+        boolean r = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_2) == GLFW.GLFW_PRESS;
+        long now = System.currentTimeMillis();
+        if (l && !leftDown) leftClicks.addLast(now);
+        if (r && !rightDown) rightClicks.addLast(now);
+        leftDown = l;
+        rightDown = r;
+        trim(leftClicks, now);
+        trim(rightClicks, now);
+    }
+
+    private static void trim(Deque<Long> clicks, long now) {
+        while (!clicks.isEmpty() && now - clicks.peekFirst() > 1000L) clicks.removeFirst();
+    }
+
     private static void render(DrawContext draw) {
         MinecraftClient c = MinecraftClient.getInstance();
         if (c.player == null || c.options.hudHidden) return;
-        int x=8,y=8; int line=12;
-        draw.drawTextWithShadow(c.textRenderer, Text.literal("BARON"), x, y, 0xFFFFFFFF); y+=line+2;
-        if (on("FPS")) { draw.drawTextWithShadow(c.textRenderer, Text.literal("FPS  " + c.getCurrentFps()), x,y,0xFFE6E6E6); y+=line; }
-        ClientPlayerEntity p=c.player;
-        if (on("Coordinates")) { draw.drawTextWithShadow(c.textRenderer, Text.literal(String.format("XYZ  %.0f  %.0f  %.0f",p.getX(),p.getY(),p.getZ())),x,y,0xFFE6E6E6); y+=line; }
-        if (on("Ping")) { int ping=-1; if(c.getNetworkHandler()!=null && p.getUuid()!=null && c.getNetworkHandler().getPlayerListEntry(p.getUuid())!=null) ping=c.getNetworkHandler().getPlayerListEntry(p.getUuid()).getLatency(); draw.drawTextWithShadow(c.textRenderer,Text.literal("PING  "+ping+"ms"),x,y,0xFFE6E6E6); }
+        int x = 9, y = 9, line = 13;
+        draw.drawTextWithShadow(c.textRenderer, Text.literal("BARON"), x, y, 0xFFFF3434);
+        y += line + 3;
+        if (on("FPS")) y = line(draw, "FPS  " + c.getCurrentFps(), x, y, onColor("FPS"));
+        ClientPlayerEntity p = c.player;
+        if (on("Coordinates")) y = line(draw, String.format(java.util.Locale.ROOT, "XYZ  %.0f  %.0f  %.0f", p.getX(), p.getY(), p.getZ()), x, y, onColor("Coordinates"));
+        if (on("Ping")) {
+            int ping = -1;
+            if (c.getNetworkHandler() != null && p.getUuid() != null && c.getNetworkHandler().getPlayerListEntry(p.getUuid()) != null)
+                ping = c.getNetworkHandler().getPlayerListEntry(p.getUuid()).getLatency();
+            y = line(draw, "PING  " + ping + "ms", x, y, onColor("Ping"));
+        }
+        if (on("CPS Counter")) y = line(draw, "CPS  " + leftClicks.size() + " | " + rightClicks.size(), x, y, onColor("CPS Counter"));
+        if (on("Keystrokes")) renderKeys(draw, c);
+        if (on("Memory")) {
+            Runtime runtime = Runtime.getRuntime();
+            long used = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
+            line(draw, "MEM  " + used + " MB", x, y, onColor("Memory"));
+        }
     }
-    private static boolean on(String n){ var m=ModuleManager.get(n); return m!=null&&m.enabled; }
+
+    private static int line(DrawContext draw, String text, int x, int y, int color) {
+        Module m = ModuleManager.get(text.startsWith("FPS") ? "FPS"
+                : text.startsWith("XYZ") ? "Coordinates"
+                : text.startsWith("PING") ? "Ping"
+                : text.startsWith("CPS") ? "CPS Counter" : "Memory");
+        if (m != null && m.showBackground) draw.fill(x - 3, y - 2, x + 128, y + 10, 0x990C0C10);
+        draw.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, Text.literal(text), x, y, color);
+        return y + 13;
+    }
+
+    private static void renderKeys(DrawContext draw, MinecraftClient c) {
+        int x = c.getWindow().getScaledWidth() - 76;
+        int y = c.getWindow().getScaledHeight() - 82;
+        key(draw, "W", x + 24, y, c.options.forwardKey.isPressed());
+        key(draw, "A", x, y + 24, c.options.leftKey.isPressed());
+        key(draw, "S", x + 24, y + 24, c.options.backKey.isPressed());
+        key(draw, "D", x + 48, y + 24, c.options.rightKey.isPressed());
+        key(draw, "LMB", x - 4, y + 50, leftDown);
+        key(draw, "RMB", x + 36, y + 50, rightDown);
+    }
+
+    private static void key(DrawContext d, String label, int x, int y, boolean pressed) {
+        int bg = pressed ? 0xFFFF3434 : 0xDD15151B;
+        d.fill(x, y, x + (label.length() > 1 ? 36 : 20), y + 20, bg);
+        d.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer, Text.literal(label),
+                x + (label.length() > 1 ? 18 : 10), y + 6, 0xFFFFFFFF);
+    }
+
+    private static boolean on(String name) {
+        Module m = ModuleManager.get(name);
+        return m != null && m.enabled;
+    }
+
+    private static int onColor(String name) {
+        Module m = ModuleManager.get(name);
+        return m == null ? 0xFFFF3434 : m.accentColor;
+    }
 }
