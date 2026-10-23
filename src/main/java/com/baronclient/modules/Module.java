@@ -7,6 +7,7 @@ public class Module {
     public int accentColor = 0xFFFF3434;
     public boolean showBackground = true;
     public int keyCode = 0;
+    public int hudX = -1, hudY = -1;
 
     public Module(String name, String category, boolean enabled) {
         this.name = name;
