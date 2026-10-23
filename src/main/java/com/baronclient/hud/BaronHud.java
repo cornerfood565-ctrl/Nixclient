@@ -94,16 +94,16 @@ public final class BaronHud {
         int x = m != null && m.hudX >= 0 ? m.hudX : c.getWindow().getScaledWidth() - 76;
         int y = m != null && m.hudY >= 0 ? m.hudY : c.getWindow().getScaledHeight() - 82;
         float scale = m == null ? 1.0f : m.scale;
-        draw.getMatrices().push();
+        draw.getMatrices().pushMatrix();
         draw.getMatrices().translate(x, y);
-        draw.getMatrices().scale(scale, scale, 1.0f);
+        draw.getMatrices().scale(scale, scale);
         key(draw, "W", 24, 0, c.options.forwardKey.isPressed());
         key(draw, "A", 0, 24, c.options.leftKey.isPressed());
         key(draw, "S", 24, 24, c.options.backKey.isPressed());
         key(draw, "D", 48, 24, c.options.rightKey.isPressed());
         key(draw, "LMB", -4, 50, leftDown);
         key(draw, "RMB", 36, 50, rightDown);
-        draw.getMatrices().pop();
+        draw.getMatrices().popMatrix();
     }
 
     private static void key(DrawContext d, String label, int x, int y, boolean pressed) {
