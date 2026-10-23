@@ -101,6 +101,8 @@ public class HudEditorScreen extends Screen {
                 int w = Math.max(58, textRenderer.getWidth(previewText(m, c)) + 12);
                 if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + 20) {
                     dragging = m;
+                    dragging.hudX = x;
+                    dragging.hudY = y;
                     dragOffsetX = (int) mouseX - x;
                     dragOffsetY = (int) mouseY - y;
                     return true;
@@ -112,12 +114,10 @@ public class HudEditorScreen extends Screen {
 
     @Override
     public boolean mouseDragged(Click click, double deltaX, double deltaY) {
-        double mouseX = click.x() + deltaX;
-        double mouseY = click.y() + deltaY;
         int button = click.button();
         if (dragging != null && button == 0) {
-            dragging.hudX = Math.max(0, Math.min(width - 30, (int) mouseX - dragOffsetX));
-            dragging.hudY = Math.max(0, Math.min(height - 20, (int) mouseY - dragOffsetY));
+            dragging.hudX = Math.max(0, Math.min(width - 30, dragging.hudX + (int) deltaX));
+            dragging.hudY = Math.max(0, Math.min(height - 20, dragging.hudY + (int) deltaY));
             return true;
         }
         return super.mouseDragged(click, deltaX, deltaY);
