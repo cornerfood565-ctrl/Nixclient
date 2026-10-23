@@ -4,6 +4,8 @@ import com.baronclient.modules.Module;
 import com.baronclient.modules.ModuleManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
@@ -84,7 +86,10 @@ public class HudEditorScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubleClick) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
         if (button == 0) {
             MinecraftClient c = MinecraftClient.getInstance();
             int index = 0;
@@ -102,33 +107,36 @@ public class HudEditorScreen extends Screen {
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubleClick);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        double mouseX = click.x() + deltaX;
+        double mouseY = click.y() + deltaY;
+        int button = click.button();
         if (dragging != null && button == 0) {
             dragging.hudX = Math.max(0, Math.min(width - 30, (int) mouseX - dragOffsetX));
             dragging.hudY = Math.max(0, Math.min(height - 20, (int) mouseY - dragOffsetY));
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, deltaX, deltaY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(Click click) {
         if (dragging != null) {
             dragging = null;
             ModuleManager.save();
             return true;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256) { close(); return true; }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        if (input.key() == 256) { close(); return true; }
+        return super.keyPressed(input);
     }
 
     @Override
