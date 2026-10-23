@@ -10,6 +10,7 @@ import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.lwjgl.glfw.GLFW;
 
 public class BaronScreen extends Screen {
     private static final int RED = 0xFFFF3434;
@@ -21,6 +22,7 @@ public class BaronScreen extends Screen {
     private int scroll = 0;
     private int animationTick = 0;
     private Module selected;
+    private boolean waitingForKey = false;
     private TextFieldWidget searchField;
     private final List<ButtonWidget> moduleButtons = new ArrayList<>();
 
@@ -120,6 +122,9 @@ public class BaronScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal(selected.showBackground ? "BG: ON" : "BG: OFF"),
                 b -> { selected.toggleBackground(); ModuleManager.save(); init(); })
                 .dimensions(left, y - 25, w, 22).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal(waitingForKey ? "PRESS A KEY..." : "BIND KEY"),
+                b -> { waitingForKey = true; })
+                .dimensions(left + w + 4, y - 25, w, 22).build());
     }
 
     @Override
@@ -140,8 +145,14 @@ public class BaronScreen extends Screen {
             d.fill(left + 8, bottom - 30, left + w - 8, bottom - 4, 0xF01A1A21);
             d.drawTextWithShadow(textRenderer, Text.literal(selected.name + "  •  " + (selected.enabled ? "ON" : "OFF")
                     + "  •  Scale " + String.format(java.util.Locale.ROOT, "%.1f", selected.scale)
+                    + "  •  Key " + (selected.keyCode == 0 ? "UNBOUND" : selected.keyCode)
                     + "  •  Background " + (selected.showBackground ? "ON" : "OFF")),
                     left + 14, bottom - 20, selected.accentColor);
+        }
+        if (waitingForKey) {
+            d.fill(width / 2 - 115, height / 2 - 18, width / 2 + 115, height / 2 + 18, 0xF0202028);
+            d.drawCenteredTextWithShadow(textRenderer, Text.literal("PRESS A KEY  •  ESC TO UNBIND"),
+                    width / 2, height / 2 - 4, RED);
         }
     }
 
@@ -150,6 +161,18 @@ public class BaronScreen extends Screen {
         scroll = Math.max(0, scroll - (int) Math.signum(vertical));
         rebuildModuleButtons();
         return true;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (waitingForKey && selected != null) {
+            selected.keyCode = keyCode == GLFW.GLFW_KEY_ESCAPE ? 0 : keyCode;
+            waitingForKey = false;
+            ModuleManager.save();
+            init();
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
