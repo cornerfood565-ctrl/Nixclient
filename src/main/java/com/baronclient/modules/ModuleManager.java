@@ -71,6 +71,8 @@ public final class ModuleManager {
             p.setProperty(key + ".color", Integer.toHexString(m.accentColor));
             p.setProperty(key + ".background", Boolean.toString(m.showBackground));
             p.setProperty(key + ".keyCode", Integer.toString(m.keyCode));
+            p.setProperty(key + ".hudX", Integer.toString(m.hudX));
+            p.setProperty(key + ".hudY", Integer.toString(m.hudY));
         }
         try {
             Files.createDirectories(configPath.getParent());
@@ -92,6 +94,8 @@ public final class ModuleManager {
                 try { m.accentColor = (int) Long.parseLong(p.getProperty(key + ".color", Integer.toHexString(m.accentColor)), 16); } catch (NumberFormatException ignored) {}
                 m.showBackground = Boolean.parseBoolean(p.getProperty(key + ".background", "true"));
                 try { m.keyCode = Integer.parseInt(p.getProperty(key + ".keyCode", "0")); } catch (NumberFormatException ignored) {}
+                try { m.hudX = Integer.parseInt(p.getProperty(key + ".hudX", "-1")); } catch (NumberFormatException ignored) {}
+                try { m.hudY = Integer.parseInt(p.getProperty(key + ".hudY", "-1")); } catch (NumberFormatException ignored) {}
             }
         } catch (IOException ignored) {}
     }
