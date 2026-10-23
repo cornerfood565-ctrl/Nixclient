@@ -77,20 +77,33 @@ public final class BaronHud {
                 : text.startsWith("XYZ") ? "Coordinates"
                 : text.startsWith("PING") ? "Ping"
                 : text.startsWith("CPS") ? "CPS Counter" : "Memory");
-        if (m != null && m.showBackground) draw.fill(x - 3, y - 2, x + 128, y + 10, 0x990C0C10);
-        draw.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, Text.literal(text), x, y, color);
+        int drawX = m != null && m.hudX >= 0 ? m.hudX : x;
+        int drawY = m != null && m.hudY >= 0 ? m.hudY : y;
+        float scale = m == null ? 1.0f : m.scale;
+        draw.getMatrices().push();
+        draw.getMatrices().translate(drawX, drawY, 0);
+        draw.getMatrices().scale(scale, scale, 1.0f);
+        if (m != null && m.showBackground) draw.fill(-3, -2, 128, 10, 0x990C0C10);
+        draw.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, Text.literal(text), 0, 0, color);
+        draw.getMatrices().pop();
         return y + 13;
     }
 
     private static void renderKeys(DrawContext draw, MinecraftClient c) {
-        int x = c.getWindow().getScaledWidth() - 76;
-        int y = c.getWindow().getScaledHeight() - 82;
-        key(draw, "W", x + 24, y, c.options.forwardKey.isPressed());
-        key(draw, "A", x, y + 24, c.options.leftKey.isPressed());
-        key(draw, "S", x + 24, y + 24, c.options.backKey.isPressed());
-        key(draw, "D", x + 48, y + 24, c.options.rightKey.isPressed());
-        key(draw, "LMB", x - 4, y + 50, leftDown);
-        key(draw, "RMB", x + 36, y + 50, rightDown);
+        Module m = ModuleManager.get("Keystrokes");
+        int x = m != null && m.hudX >= 0 ? m.hudX : c.getWindow().getScaledWidth() - 76;
+        int y = m != null && m.hudY >= 0 ? m.hudY : c.getWindow().getScaledHeight() - 82;
+        float scale = m == null ? 1.0f : m.scale;
+        draw.getMatrices().push();
+        draw.getMatrices().translate(x, y, 0);
+        draw.getMatrices().scale(scale, scale, 1.0f);
+        key(draw, "W", 24, 0, c.options.forwardKey.isPressed());
+        key(draw, "A", 0, 24, c.options.leftKey.isPressed());
+        key(draw, "S", 24, 24, c.options.backKey.isPressed());
+        key(draw, "D", 48, 24, c.options.rightKey.isPressed());
+        key(draw, "LMB", -4, 50, leftDown);
+        key(draw, "RMB", 36, 50, rightDown);
+        draw.getMatrices().pop();
     }
 
     private static void key(DrawContext d, String label, int x, int y, boolean pressed) {
