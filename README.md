@@ -1,17 +1,37 @@
 # Baron Client — Minecraft 1.21.11
 
-A client-side Fabric mod foundation with a black modern ClickGUI, PvP HUD utilities, and visual customization.
+A client-side Fabric mod project with a dark ClickGUI and starter HUD/module registry.
 
-## Build on GitHub
-Open the **Actions** tab and run **Build Baron Client**. It compiles with Java 21 and Gradle on a GitHub-hosted runner, then uploads the remapped JAR as a workflow artifact.
+## Build status
+
+GitHub Actions runs Gradle automatically on every push to `main` and can be started manually from the **Actions** tab. The compiled JAR is uploaded as the `baron-client-1.21.11` workflow artifact when the build succeeds.
+
+## Toolchain
+
+- Minecraft 1.21.11
+- Java 21
+- Fabric Loader 0.18.1
+- Fabric API 0.141.6+1.21.11
+- Fabric Loom 1.14.10
+- Yarn 1.21.11+build.6
+
+## Current foundation
+
+- Right Shift opens the Baron Client GUI
+- Module toggle buttons grouped by category in the starter registry
+- FPS, coordinates and ping HUD
+- Starter registry for PvP, HUD, visual and performance modules
+
+**Important:** several registered modules are placeholders and do not yet implement their advertised behavior. This source has not been confirmed to compile until the GitHub Actions build completes.
 
 ## Local build
-Install Java 21 and Gradle 9.2 or newer, then run `gradle build`. The JAR is written to `build/libs/`.
 
-## Controls
-- Right Shift: open Baron Client GUI
+Install Java 21 and Gradle 9.2.1+, then run:
 
-## Status
-The initial source includes the module registry, black ClickGUI, FPS/coordinates/ping HUD, and registered module placeholders for the next implementation pass. Not every registered module is fully implemented yet.
+```bash
+gradle build
+```
+
+The JAR should be created under `build/libs/`.
 
 Minecraft is a trademark of Mojang Studios. Baron Client is not affiliated with Mojang.
