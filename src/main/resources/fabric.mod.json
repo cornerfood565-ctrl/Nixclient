@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "baronclient",
+  "version": "${version}",
+  "name": "Baron Client",
+  "description": "A modern black PvP-focused client-side experience.",
+  "authors": ["Baron Client"],
+  "environment": "client",
+  "entrypoints": { "client": ["com.baronclient.BaronClient"] },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "~1.21.11",
+    "fabric-api": "*"
+  }
+}
