@@ -81,8 +81,8 @@ public final class BaronHud {
         int drawY = m != null && m.hudY >= 0 ? m.hudY : y;
         float scale = m == null ? 1.0f : m.scale;
         draw.getMatrices().push();
-        draw.getMatrices().translate(drawX, drawY, 0);
-        draw.getMatrices().scale(scale, scale, 1.0f);
+        draw.getMatrices().translate(drawX, drawY);
+        draw.getMatrices().scale(scale, scale);
         if (m != null && m.showBackground) draw.fill(-3, -2, 128, 10, 0x990C0C10);
         draw.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, Text.literal(text), 0, 0, color);
         draw.getMatrices().pop();
@@ -95,7 +95,7 @@ public final class BaronHud {
         int y = m != null && m.hudY >= 0 ? m.hudY : c.getWindow().getScaledHeight() - 82;
         float scale = m == null ? 1.0f : m.scale;
         draw.getMatrices().push();
-        draw.getMatrices().translate(x, y, 0);
+        draw.getMatrices().translate(x, y);
         draw.getMatrices().scale(scale, scale, 1.0f);
         key(draw, "W", 24, 0, c.options.forwardKey.isPressed());
         key(draw, "A", 0, 24, c.options.leftKey.isPressed());
