@@ -73,7 +73,11 @@ public class HudEditorScreen extends Screen {
         if (m.name.equals("FPS")) return "FPS  " + c.getCurrentFps();
         if (m.name.equals("Coordinates") && c.player != null)
             return String.format(java.util.Locale.ROOT, "XYZ  %.0f  %.0f  %.0f", c.player.getX(), c.player.getY(), c.player.getZ());
-        if (m.name.equals("Ping")) return "PING  " + (c.getNetworkHandler() == null ? -1 : c.getNetworkHandler().getPlayerListEntry(c.player.getUuid()) == null ? -1 : c.getNetworkHandler().getPlayerListEntry(c.player.getUuid()).getLatency()) + "ms";
+        if (m.name.equals("Ping")) {
+            if (c.player == null || c.getNetworkHandler() == null) return "PING  --";
+            var entry = c.getNetworkHandler().getPlayerListEntry(c.player.getUuid());
+            return "PING  " + (entry == null ? -1 : entry.getLatency()) + "ms";
+        }
         if (m.name.equals("CPS Counter")) return "CPS  0 | 0";
         if (m.name.equals("Keystrokes")) return "W  A  S  D  LMB  RMB";
         return "MEM  " + (Runtime.getRuntime().totalMemory() / (1024 * 1024)) + " MB";
