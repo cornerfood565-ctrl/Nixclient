@@ -34,11 +34,11 @@ public class BaronScreen extends Screen {
 
     public BaronScreen() { super(Text.literal("Baron Client")); }
 
-    private int panelW() { return Math.min(1000, width - 32); }
-    private int panelH() { return Math.min(620, height - 28); }
+    private int panelW() { return Math.max(1, Math.min(900, width - 32)); }
+    private int panelH() { return Math.max(1, Math.min(540, height - 28)); }
     private int left() { return (width - panelW()) / 2; }
     private int top() { return (height - panelH()) / 2; }
-    private int sidebarW() { return 164; }
+    private int sidebarW() { return Math.min(154, Math.max(126, panelW() / 4)); }
     private int settingsW() { return settingsOpen ? Math.min(232, Math.max(168, panelW() - sidebarW() - 220)) : 0; }
     private int contentLeft() { return left() + sidebarW() + 20; }
     private int contentRight() { return left() + panelW() - settingsW() - 20; }
@@ -91,7 +91,7 @@ public class BaronScreen extends Screen {
         // Main content header.
         int cx = contentLeft() + offset;
         int cr = contentRight() + offset;
-        int cw = cr - cx;
+        int cw = Math.max(1, cr - cx);
         d.drawTextWithShadow(textRenderer, Text.literal(category.equals("All Modules") ? "Module Library" : category),
                 cx, y + 22 + offset, 0xFFFFFFFF);
         d.drawTextWithShadow(textRenderer, Text.literal("Tune your client. Make every frame count."),
@@ -99,26 +99,28 @@ public class BaronScreen extends Screen {
 
         // Search field is custom drawn, not a vanilla widget.
         int searchY = y + 60 + offset;
-        d.fill(cx, searchY, cx + Math.min(245, cw - 176), searchY + 27, searchFocused ? 0xFF24242E : CARD);
+        int searchW = Math.max(90, Math.min(220, cw - 154));
+        d.fill(cx, searchY, cx + searchW, searchY + 27, searchFocused ? 0xFF24242E : CARD);
         d.drawTextWithShadow(textRenderer, Text.literal("⌕"), cx + 9, searchY + 8, searchFocused ? RED : MUTED);
         String searchLabel = search.isEmpty() ? "Search modules..." : search;
         d.drawTextWithShadow(textRenderer, Text.literal(searchLabel + (searchFocused && animTick % 30 < 15 ? "▏" : "")),
                 cx + 28, searchY + 8, search.isEmpty() ? MUTED : 0xFFECECF2);
 
-        int layoutX = cr - 144;
-        pill(d, layoutX, searchY, 68, 27, compact ? "COMPACT" : "FULL", compact, mouseX, mouseY);
-        pill(d, layoutX + 74, searchY, 70, 27, "HUD EDIT", false, mouseX, mouseY);
+        int layoutX = cr - 140;
+        pill(d, layoutX, searchY, 64, 27, compact ? "COMPACT" : "FULL", compact, mouseX, mouseY);
+        pill(d, layoutX + 70, searchY, 70, 27, "HUD EDIT", false, mouseX, mouseY);
 
         int listY = y + 104 + offset;
         d.drawTextWithShadow(textRenderer, Text.literal(filtered().size() + " MODULES"),
                 cx, listY, RED);
-        d.drawTextWithShadow(textRenderer, Text.literal("CLICK A CARD TO TOGGLE  •  OPEN THE SLIDER ICON FOR OPTIONS"),
-                cx + 92, listY, MUTED);
+        String hint = "CLICK A CARD TO TOGGLE";
+        if (cw > 440) hint += "  •  ⋯ FOR OPTIONS";
+        d.drawTextWithShadow(textRenderer, Text.literal(hint), cx + Math.min(190, Math.max(100, cw / 3)), listY, MUTED);
 
         int gridTop = listY + 20;
         int availableW = Math.max(1, cw);
         int gap = 9;
-        int columns = compact ? 1 : (availableW >= 460 ? 2 : 1);
+        int columns = compact ? 1 : (availableW >= 500 ? 2 : 1);
         int cardW = Math.max(1, (availableW - gap * (columns - 1)) / columns);
         int cardH = compact ? 46 : 62;
         int visibleRows = Math.max(1, (y + h - 26 - gridTop) / (cardH + gap));
@@ -220,12 +222,13 @@ public class BaronScreen extends Screen {
         }
         int cx = contentLeft() + offset, cr = contentRight() + offset, cw = cr - cx;
         int searchY = y + 60 + offset;
-        if (inside(mx, my, cx, searchY, Math.min(245, cw - 176), 27)) {
+        int searchW = Math.max(90, Math.min(220, cw - 154));
+        if (inside(mx, my, cx, searchY, searchW, 27)) {
             searchFocused = true; return true;
         } else searchFocused = false;
-        int layoutX = cr - 144;
-        if (inside(mx, my, layoutX, searchY, 68, 27)) { compact = !compact; scroll = 0; return true; }
-        if (inside(mx, my, layoutX + 74, searchY, 70, 27)) {
+        int layoutX = cr - 140;
+        if (inside(mx, my, layoutX, searchY, 64, 27)) { compact = !compact; scroll = 0; return true; }
+        if (inside(mx, my, layoutX + 70, searchY, 70, 27)) {
             if (client != null) client.setScreen(new HudEditorScreen()); return true;
         }
 
