@@ -34,14 +34,14 @@ public class BaronScreen extends Screen {
 
     public BaronScreen() { super(Text.literal("Baron Client")); }
 
-    private int panelW() { return Math.max(1, Math.min(760, width - 32)); }
-    private int panelH() { return Math.max(1, Math.min(430, height - 28)); }
+    private int panelW() { return Math.max(1, Math.min(900, (int)(width * 0.84))); }
+    private int panelH() { return Math.max(1, Math.min(540, (int)(height * 0.82))); }
     private int left() { return (width - panelW()) / 2; }
     private int top() { return (height - panelH()) / 2; }
-    private int sidebarW() { return Math.min(150, Math.max(124, panelW() / 4)); }
+    private int sidebarW() { return 0; }
     private int settingsW() { return settingsOpen ? Math.min(232, Math.max(168, panelW() - sidebarW() - 220)) : 0; }
-    private int contentLeft() { return left() + sidebarW() + 20; }
-    private int contentRight() { return left() + panelW() - settingsW() - 20; }
+    private int contentLeft() { return left() + 14; }
+    private int contentRight() { return left() + panelW() - 14; }
 
     @Override protected void init() { }
 
@@ -55,154 +55,109 @@ public class BaronScreen extends Screen {
     @Override
     public void render(DrawContext d, int mouseX, int mouseY, float delta) {
         animTick++;
-        openProgress = Math.min(1f, openProgress + 0.12f);
-        d.fill(0, 0, width, height, 0xB8000000);
+        openProgress = Math.min(1f, openProgress + 0.16f);
+        d.fill(0, 0, width, height, 0x99000000);
+
         int x = left(), y = top(), w = panelW(), h = panelH();
-        int offset = (int)((1f - openProgress) * 14);
-        d.fill(x + offset, y + offset, x + w + offset, y + h + offset, BG);
-        d.fill(x + offset, y + offset, x + sidebarW() + offset, y + h + offset, SIDEBAR);
+        int off = (int)((1f - openProgress) * 8);
+        d.fill(x + off, y + off, x + w + off, y + h + off, 0xF20A0B10);
+        d.fill(x + off, y + off, x + w + off, y + 2 + off, RED);
+        d.fill(x + 12 + off, y + 12 + off, x + w - 12 + off, y + 43 + off, 0xFF111219);
 
-        // Brand header and animated accent line.
-        d.fill(x + 18 + offset, y + 18 + offset, x + 22 + offset, y + 54 + offset, RED);
-        d.drawTextWithShadow(textRenderer, Text.literal("BARON"), x + 32 + offset, y + 19 + offset, 0xFFFFFFFF);
-        d.drawTextWithShadow(textRenderer, Text.literal("CLIENT"), x + 32 + offset, y + 32 + offset, RED);
-        d.drawTextWithShadow(textRenderer, Text.literal("PVP  /  1.21.11"), x + 18 + offset, y + 67 + offset, MUTED);
-        d.fill(x + 14 + offset, y + 91 + offset, x + sidebarW() - 14 + offset, y + 92 + offset, 0xFF2A2A34);
-        d.drawTextWithShadow(textRenderer, Text.literal("WORKSPACE"), x + 18 + offset, y + 104 + offset, MUTED);
+        d.drawTextWithShadow(textRenderer, Text.literal("◈  BARON CLIENT"), x + 22 + off, y + 23 + off, 0xFFFFFFFF);
+        d.drawTextWithShadow(textRenderer, Text.literal("1.21.11"), x + 128 + off, y + 23 + off, MUTED);
+        pill(d, x + w - 112 + off, y + 15 + off, 94, 22, "✕  CLOSE", false, mouseX, mouseY);
 
-        int navY = y + 126 + offset;
-        for (int i = 0; i < CATEGORIES.length; i++) {
-            int ny = navY + i * 35;
-            boolean active = category.equals(CATEGORIES[i]);
-            boolean hover = inside(mouseX, mouseY, x + 10 + offset, ny - 5, sidebarW() - 20, 29);
-            if (active || hover) d.fill(x + 10 + offset, ny - 5, x + sidebarW() - 10 + offset, ny + 24, active ? 0xFF2B171D : CARD_HOVER);
-            if (active) d.fill(x + 10 + offset, ny - 5, x + 13 + offset, ny + 24, RED);
-            String icon = switch (i) { case 1 -> "⚔"; case 2 -> "▦"; case 3 -> "◈"; case 4 -> "⚙"; default -> "▤"; };
-            d.drawTextWithShadow(textRenderer, Text.literal(icon), x + 22 + offset, ny + 4, active ? RED : MUTED);
-            d.drawTextWithShadow(textRenderer, Text.literal(CATEGORIES[i]), x + 43 + offset, ny + 4, active ? 0xFFFFFFFF : 0xFFB8B8C2);
+        int tabY = y + 53 + off;
+        String[] tabs = {"ALL", "NEW", "HUD", "HYPIXEL", "PVP"};
+        int tabW = Math.max(43, Math.min(60, (w - 240) / 5));
+        int tabX = x + 14 + off;
+        for (int i = 0; i < tabs.length; i++) {
+            boolean active = (i == 0 && category.equals("All Modules"))
+                    || (i == 2 && category.equals("HUD"))
+                    || (i == 4 && category.equals("Combat"))
+                    || (i == 3 && category.equals("Render"))
+                    || (i == 1 && category.equals("Utility"));
+            pill(d, tabX + i * (tabW + 4), tabY, tabW, 22, tabs[i], active, mouseX, mouseY);
         }
 
-        int bottomY = y + h - 54 + offset;
-        d.fill(x + 14 + offset, bottomY - 12, x + sidebarW() - 14 + offset, bottomY - 11, 0xFF2A2A34);
-        d.fill(x + 19 + offset, bottomY + 3, x + 27 + offset, bottomY + 11, 0xFF52D68A);
-        d.drawTextWithShadow(textRenderer, Text.literal("FABRIC READY"), x + 34 + offset, bottomY + 2, 0xFFB9C9BE);
-        d.drawTextWithShadow(textRenderer, Text.literal("BARON  •  BUILD 01"), x + 18 + offset, bottomY + 20, MUTED);
+        int searchW = Math.min(160, Math.max(100, w / 4));
+        int searchX = x + w - searchW - 76 + off;
+        d.fill(searchX, tabY, searchX + searchW, tabY + 22, searchFocused ? 0xFF292A32 : CARD);
+        d.drawTextWithShadow(textRenderer, Text.literal("⌕"), searchX + 7, tabY + 7, RED);
+        String searchText = search.isEmpty() ? "Search..." : search;
+        d.drawTextWithShadow(textRenderer, Text.literal(searchText + (searchFocused && animTick % 30 < 15 ? "▏" : "")),
+                searchX + 22, tabY + 7, search.isEmpty() ? MUTED : 0xFFEAEAF0);
+        pill(d, x + w - 62 + off, tabY, 22, 22, "♥", false, mouseX, mouseY);
+        pill(d, x + w - 36 + off, tabY, 22, 22, "▦", false, mouseX, mouseY);
 
-        // Main content header.
-        int cx = contentLeft() + offset;
-        int cr = contentRight() + offset;
-        int cw = Math.max(1, cr - cx);
-        d.drawTextWithShadow(textRenderer, Text.literal(category.equals("All Modules") ? "Module Library" : category),
-                cx, y + 22 + offset, 0xFFFFFFFF);
-        d.drawTextWithShadow(textRenderer, Text.literal("Tune your client. Make every frame count."),
-                cx, y + 37 + offset, MUTED);
-
-        // Search field is custom drawn, not a vanilla widget.
-        int searchY = y + 60 + offset;
-        int searchW = Math.max(90, Math.min(220, cw - 148));
-        d.fill(cx, searchY, cx + searchW, searchY + 27, searchFocused ? 0xFF24242E : CARD);
-        d.drawTextWithShadow(textRenderer, Text.literal("⌕"), cx + 9, searchY + 8, searchFocused ? RED : MUTED);
-        String searchLabel = search.isEmpty() ? "Search modules..." : search;
-        d.drawTextWithShadow(textRenderer, Text.literal(searchLabel + (searchFocused && animTick % 30 < 15 ? "▏" : "")),
-                cx + 28, searchY + 8, search.isEmpty() ? MUTED : 0xFFECECF2);
-
-        int layoutX = cr - 136;
-        pill(d, layoutX, searchY, 64, 27, compact ? "COMPACT" : "FULL", compact, mouseX, mouseY);
-        pill(d, layoutX + 70, searchY, 70, 27, "HUD EDIT", false, mouseX, mouseY);
-
-        int listY = y + 104 + offset;
-        d.drawTextWithShadow(textRenderer, Text.literal(filtered().size() + " MODULES"),
-                cx, listY, RED);
-        String hint = "CLICK A CARD TO TOGGLE";
-        if (cw > 440) hint += "  •  ⋯ FOR OPTIONS";
-        d.drawTextWithShadow(textRenderer, Text.literal(hint), cx + Math.min(190, Math.max(100, cw / 3)), listY, MUTED);
-
-        int gridTop = listY + 20;
-        int availableW = Math.max(1, cw);
-        int gap = 9;
-        int columns = compact ? 1 : (availableW >= 500 ? 2 : 1);
-        int cardW = Math.max(1, (availableW - gap * (columns - 1)) / columns);
-        int cardH = compact ? 46 : 62;
-        int visibleRows = Math.max(1, (y + h - 26 - gridTop) / (cardH + gap));
+        int contentX = x + 14 + off;
+        int contentW = w - 28;
+        int labelY = y + 83 + off;
         List<Module> mods = filtered();
-        int maxScroll = Math.max(0, (mods.size() + columns - 1) / columns - visibleRows);
-        scroll = Math.min(scroll, maxScroll);
+        d.drawTextWithShadow(textRenderer, Text.literal("MODULES  " + mods.size()), contentX, labelY, RED);
+
+        int gridY = y + 101 + off;
+        int gap = 7;
+        int columns = contentW >= 520 ? 5 : contentW >= 390 ? 4 : contentW >= 280 ? 3 : 2;
+        int cardW = Math.max(54, (contentW - gap * (columns - 1)) / columns);
+        int cardH = Math.max(56, Math.min(72, (h - 130) / 3));
+        int rowsVisible = Math.max(1, (y + h - 13 - gridY) / (cardH + gap));
+        int maxScroll = Math.max(0, (mods.size() + columns - 1) / columns - rowsVisible);
+        scroll = Math.max(0, Math.min(scroll, maxScroll));
+
         for (int i = 0; i < mods.size(); i++) {
             Module m = mods.get(i);
-            int col = i % columns;
-            int row = i / columns - scroll;
-            if (row < 0 || row >= visibleRows) continue;
-            int mx = cx + col * (cardW + gap);
-            int my = gridTop + row * (cardH + gap);
+            int col = i % columns, row = i / columns - scroll;
+            if (row < 0 || row >= rowsVisible) continue;
+            int mx = contentX + col * (cardW + gap);
+            int my = gridY + row * (cardH + gap);
             boolean hover = inside(mouseX, mouseY, mx, my, cardW, cardH);
-            d.fill(mx, my, mx + cardW, my + cardH, hover ? CARD_HOVER : CARD);
-            d.fill(mx, my, mx + 3, my + cardH, m.enabled ? m.accentColor : 0xFF34343E);
-            d.drawTextWithShadow(textRenderer, Text.literal(m.name), mx + 13, my + 10, m.enabled ? 0xFFFFFFFF : 0xFFC2C2CB);
-            d.drawTextWithShadow(textRenderer, Text.literal(m.category.toUpperCase(Locale.ROOT)),
-                    mx + 13, my + 28, MUTED);
-            if (!compact) {
-                d.drawTextWithShadow(textRenderer, Text.literal(m.enabled ? "ACTIVE" : "OFF"),
-                        mx + cardW - 76, my + 11, m.enabled ? 0xFF69E5A1 : MUTED);
-                int sw = 28, sh = 14, sx = mx + cardW - 41, sy = my + 31;
-                d.fill(sx, sy, sx + sw, sy + sh, m.enabled ? RED_DARK : 0xFF34343E);
-                int knobX = m.enabled ? sx + sw - 11 : sx + 3;
-                d.fill(knobX, sy + 3, knobX + 8, sy + sh - 3, m.enabled ? RED : 0xFFB4B4BE);
-            } else {
-                d.fill(mx + cardW - 33, my + 15, mx + cardW - 13, my + 31, m.enabled ? RED : 0xFF34343E);
-                d.drawTextWithShadow(textRenderer, Text.literal(m.enabled ? "✓" : "·"), mx + cardW - 27, my + 19, 0xFFFFFFFF);
-            }
-            // Dedicated options glyph at the far right of every card.
-            d.drawTextWithShadow(textRenderer, Text.literal("⋯"), mx + cardW - 17, my + cardH - 17, MUTED);
-            if (selected == m) {
-                d.fill(mx + 4, my + cardH - 2, mx + cardW - 4, my + cardH - 1, RED);
-            }
+            d.fill(mx, my, mx + cardW, my + cardH, hover ? 0xFF292A33 : CARD);
+            d.fill(mx, my, mx + cardW, my + 2, m.enabled ? 0xFF4DCA75 : 0xFF34343E);
+            d.drawTextWithShadow(textRenderer, Text.literal(iconFor(m.name)), mx + cardW / 2 - 5, my + 9, 0xFFE8E8EE);
+            String name = m.name.length() > Math.max(8, cardW / 6) ? m.name.substring(0, Math.max(5, cardW / 6 - 1)) + "…" : m.name;
+            d.drawCenteredTextWithShadow(textRenderer, Text.literal(name), mx + cardW / 2, my + 26, 0xFFF0F0F4);
+            d.drawCenteredTextWithShadow(textRenderer, Text.literal(m.enabled ? "ENABLED" : "DISABLED"),
+                    mx + cardW / 2, my + 39, m.enabled ? 0xFF62D783 : MUTED);
+            d.fill(mx + 5, my + cardH - 14, mx + cardW - 5, my + cardH - 5, m.enabled ? 0xFF174C25 : 0xFF24252C);
+            d.drawCenteredTextWithShadow(textRenderer, Text.literal(m.enabled ? "ON" : "OFF"),
+                    mx + cardW / 2, my + cardH - 12, m.enabled ? 0xFF9BEBA9 : MUTED);
+            d.drawTextWithShadow(textRenderer, Text.literal("⚙"), mx + cardW - 11, my + 4, MUTED);
+            if (selected == m) d.fill(mx + 3, my + cardH - 2, mx + cardW - 3, my + cardH - 1, RED);
         }
+        d.drawTextWithShadow(textRenderer, Text.literal("RIGHT SHIFT  •  CLOSE"), x + w - 118 + off, y + h - 12 + off, MUTED);
+    }
 
-        // Settings drawer.
-        if (settingsOpen) {
-            int sx = x + w - settingsW() - 14 + offset;
-            int sy = y + 112 + offset;
-            int sw = settingsW() - 12;
-            d.fill(sx, sy, sx + sw, y + h - 18 + offset, 0xFF111117);
-            d.drawTextWithShadow(textRenderer, Text.literal("MODULE SETTINGS"), sx + 12, sy + 12, MUTED);
-            if (selected == null) {
-                d.drawTextWithShadow(textRenderer, Text.literal("Select a module"), sx + 12, sy + 42, 0xFFFFFFFF);
-                d.drawTextWithShadow(textRenderer, Text.literal("to customize its look"), sx + 12, sy + 56, MUTED);
-                d.drawTextWithShadow(textRenderer, Text.literal("and behaviour."), sx + 12, sy + 69, MUTED);
-            } else {
-                d.drawTextWithShadow(textRenderer, Text.literal(selected.name), sx + 12, sy + 38, 0xFFFFFFFF);
-                d.drawTextWithShadow(textRenderer, Text.literal(selected.enabled ? "● ENABLED" : "○ DISABLED"),
-                        sx + 12, sy + 54, selected.enabled ? 0xFF69E5A1 : MUTED);
-                d.fill(sx + 12, sy + 77, sx + sw - 12, sy + 78, 0xFF30303A);
-                d.drawTextWithShadow(textRenderer, Text.literal("HUD SCALE"), sx + 12, sy + 90, MUTED);
-                d.drawTextWithShadow(textRenderer, Text.literal(String.format(Locale.ROOT, "%.1fx", selected.scale)),
-                        sx + sw - 48, sy + 90, 0xFFFFFFFF);
-                customButton(d, sx + 12, sy + 110, 36, 25, "−", mouseX, mouseY);
-                customButton(d, sx + 54, sy + 110, 36, 25, "+", mouseX, mouseY);
-                customButton(d, sx + 12, sy + 145, sw - 24, 26,
-                        selected.showBackground ? "BACKGROUND  ON" : "BACKGROUND  OFF", mouseX, mouseY);
-                customButton(d, sx + 12, sy + 180, sw - 24, 26, "CHANGE ACCENT COLOUR", mouseX, mouseY);
-                customButton(d, sx + 12, sy + 215, sw - 24, 26,
-                        waitingForKey ? "PRESS A KEY..." : "SET MODULE KEYBIND", mouseX, mouseY);
-                d.drawTextWithShadow(textRenderer, Text.literal("HUD POSITION"), sx + 12, sy + 256, MUTED);
-                d.drawTextWithShadow(textRenderer, Text.literal(selected.hudX < 0 ? "Default layout" : selected.hudX + ", " + selected.hudY),
-                        sx + 12, sy + 273, 0xFFECECF2);
-                customButton(d, sx + 12, sy + 295, sw - 24, 26, "OPEN HUD EDITOR", mouseX, mouseY);
-            }
-        }
-
-        d.drawTextWithShadow(textRenderer, Text.literal("RIGHT SHIFT  •  CLOSE"), x + w - 170 + offset, y + h - 13 + offset, MUTED);
+    private String iconFor(String name) {
+        return switch (name) {
+            case "CPS Counter" -> "⌁";
+            case "Keystrokes" -> "⌨";
+            case "Hit Indicator", "Attack Indicator" -> "✛";
+            case "Custom Crosshair" -> "⊕";
+            case "Damage Flash" -> "▰";
+            case "Fullbright" -> "☀";
+            case "Item Physics" -> "◆";
+            case "Motion Blur" -> "◌";
+            case "FPS" -> "FPS";
+            case "Coordinates" -> "⌖";
+            case "Ping" -> "⌁";
+            case "Potion Effects" -> "⚗";
+            case "Armor HUD" -> "♜";
+            case "Boss Bar" -> "━";
+            case "Scoreboard" -> "▤";
+            case "Direction" -> "➤";
+            case "Clock" -> "◷";
+            case "Memory" -> "▥";
+            default -> "✦";
+        };
     }
 
     private void pill(DrawContext d, int x, int y, int w, int h, String label, boolean active, int mx, int my) {
         boolean hover = inside(mx, my, x, y, w, h);
         d.fill(x, y, x + w, y + h, active ? RED_DARK : hover ? CARD_HOVER : CARD);
-        d.drawCenteredTextWithShadow(textRenderer, Text.literal(label), x + w / 2, y + 9, active ? 0xFFFFFFFF : 0xFFE1E1E8);
-    }
-
-    private void customButton(DrawContext d, int x, int y, int w, int h, String label, int mx, int my) {
-        d.fill(x, y, x + w, y + h, inside(mx, my, x, y, w, h) ? 0xFF34343F : 0xFF24242D);
-        d.drawCenteredTextWithShadow(textRenderer, Text.literal(label), x + w / 2, y + (h - 8) / 2, 0xFFEAEAF0);
+        d.drawCenteredTextWithShadow(textRenderer, Text.literal(label), x + w / 2, y + (h - 8) / 2,
+                active ? 0xFFFFFFFF : 0xFFE1E1E8);
     }
 
     private boolean inside(double mx, double my, int x, int y, int w, int h) {
@@ -213,61 +168,47 @@ public class BaronScreen extends Screen {
     public boolean mouseClicked(Click click, boolean doubleClick) {
         double mx = click.x(), my = click.y();
         if (click.button() != 0) return super.mouseClicked(click, doubleClick);
-        int x = left(), y = top(), w = panelW(), h = panelH(), offset = (int)((1f - openProgress) * 14);
-        int navX = x + 10 + offset, navY = y + 121 + offset;
-        for (int i = 0; i < CATEGORIES.length; i++) {
-            if (inside(mx, my, navX, navY + i * 35, sidebarW() - 20, 29)) {
-                category = CATEGORIES[i]; scroll = 0; selected = null; searchFocused = false; return true;
+        int x = left(), y = top(), w = panelW(), h = panelH(), off = (int)((1f - openProgress) * 8);
+        if (inside(mx, my, x + w - 112 + off, y + 15 + off, 94, 22)) { close(); return true; }
+
+        int tabY = y + 53 + off;
+        int tabW = Math.max(43, Math.min(60, (w - 240) / 5));
+        int tabX = x + 14 + off;
+        String[] tabs = {"ALL", "NEW", "HUD", "HYPIXEL", "PVP"};
+        for (int i = 0; i < tabs.length; i++) {
+            if (inside(mx, my, tabX + i * (tabW + 4), tabY, tabW, 22)) {
+                category = switch (i) { case 1 -> "Utility"; case 2 -> "HUD"; case 3 -> "Render"; case 4 -> "Combat"; default -> "All Modules"; };
+                scroll = 0; selected = null; return true;
             }
         }
-        int cx = contentLeft() + offset, cr = contentRight() + offset, cw = cr - cx;
-        int searchY = y + 60 + offset;
-        int searchW = Math.max(90, Math.min(220, cw - 154));
-        if (inside(mx, my, cx, searchY, searchW, 27)) {
-            searchFocused = true; return true;
-        } else searchFocused = false;
-        int layoutX = cr - 140;
-        if (inside(mx, my, layoutX, searchY, 62, 27)) { compact = !compact; scroll = 0; return true; }
-        if (inside(mx, my, layoutX + 66, searchY, 70, 27)) {
-            if (client != null) client.setScreen(new HudEditorScreen()); return true;
-        }
+        int searchW = Math.min(160, Math.max(100, w / 4));
+        int searchX = x + w - searchW - 76 + off;
+        if (inside(mx, my, searchX, tabY, searchW, 22)) { searchFocused = true; return true; }
+        searchFocused = false;
 
-        int listY = y + 104 + offset;
-        int gridTop = listY + 20;
-        int availableW = Math.max(1, cw);
-        int gap = 8, columns = compact ? 1 : (availableW >= 440 ? 2 : 1);
-        int cardW = Math.max(1, (availableW - gap * (columns - 1)) / columns);
-        int cardH = compact ? 46 : 62;
-        int visibleRows = Math.max(1, (y + h - 26 - gridTop) / (cardH + gap));
+        int contentX = x + 14 + off, contentW = w - 28;
+        int gridY = y + 101 + off, gap = 7;
+        int columns = contentW >= 520 ? 5 : contentW >= 390 ? 4 : contentW >= 280 ? 3 : 2;
+        int cardW = Math.max(54, (contentW - gap * (columns - 1)) / columns);
+        int cardH = Math.max(56, Math.min(72, (h - 130) / 3));
+        int rowsVisible = Math.max(1, (y + h - 13 - gridY) / (cardH + gap));
         List<Module> mods = filtered();
-        int maxScroll = Math.max(0, (mods.size() + columns - 1) / columns - visibleRows);
-        scroll = Math.min(scroll, maxScroll);
+        int maxScroll = Math.max(0, (mods.size() + columns - 1) / columns - rowsVisible);
+        scroll = Math.max(0, Math.min(scroll, maxScroll));
         for (int i = 0; i < mods.size(); i++) {
             Module m = mods.get(i);
             int col = i % columns, row = i / columns - scroll;
-            if (row < 0 || row >= visibleRows) continue;
-            int mx0 = cx + col * (cardW + gap), my0 = gridTop + row * (cardH + gap);
+            if (row < 0 || row >= rowsVisible) continue;
+            int mx0 = contentX + col * (cardW + gap), my0 = gridY + row * (cardH + gap);
             if (inside(mx, my, mx0, my0, cardW, cardH)) {
                 selected = m;
-                if (mx >= mx0 + cardW - 24 && my >= my0 + cardH - 23) {
-                    settingsOpen = true;
+                if (mx >= mx0 + cardW - 18 && my <= my0 + 18) {
+                    settingsOpen = !settingsOpen;
                 } else {
                     m.toggle(); ModuleManager.save();
                 }
                 return true;
             }
-        }
-        if (settingsOpen && selected != null) {
-            int sx = x + w - settingsW() - 14 + offset, sy = y + 112 + offset, sw = settingsW() - 12;
-            if (inside(mx, my, sx + 12, sy + 110, 36, 25)) selected.adjustScale(-0.1f);
-            else if (inside(mx, my, sx + 54, sy + 110, 36, 25)) selected.adjustScale(0.1f);
-            else if (inside(mx, my, sx + 12, sy + 145, sw - 24, 26)) selected.toggleBackground();
-            else if (inside(mx, my, sx + 12, sy + 180, sw - 24, 26)) selected.cycleAppearance();
-            else if (inside(mx, my, sx + 12, sy + 215, sw - 24, 26)) { waitingForKey = true; return true; }
-            else if (inside(mx, my, sx + 12, sy + 295, sw - 24, 26)) {
-                if (client != null) client.setScreen(new HudEditorScreen()); return true;
-            } else return super.mouseClicked(click, doubleClick);
-            ModuleManager.save(); return true;
         }
         return super.mouseClicked(click, doubleClick);
     }
