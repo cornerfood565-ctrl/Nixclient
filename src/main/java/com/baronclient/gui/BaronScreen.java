@@ -278,24 +278,25 @@ public class BaronScreen extends Screen {
         }
         if (key == GLFW.GLFW_KEY_ESCAPE || key == GLFW.GLFW_KEY_RIGHT_SHIFT) { close(); return true; }
         if (searchFocused) {
-            if (key == GLFW.GLFW_KEY_BACKSPACE && !search.isEmpty()) search = search.substring(0, search.length() - 1);
-            else if (key == GLFW.GLFW_KEY_ENTER) searchFocused = false;
-            else return super.keyPressed(input);
+            if (key == GLFW.GLFW_KEY_BACKSPACE && !search.isEmpty()) {
+                search = search.substring(0, search.length() - 1);
+            } else if (key == GLFW.GLFW_KEY_ENTER) {
+                searchFocused = false;
+            } else if (key >= GLFW.GLFW_KEY_A && key <= GLFW.GLFW_KEY_Z && search.length() < 40) {
+                search += (char) ('a' + key - GLFW.GLFW_KEY_A);
+            } else if (key >= GLFW.GLFW_KEY_0 && key <= GLFW.GLFW_KEY_9 && search.length() < 40) {
+                search += (char) ('0' + key - GLFW.GLFW_KEY_0);
+            } else if (key == GLFW.GLFW_KEY_SPACE && search.length() < 40) {
+                search += " ";
+            } else if (key == GLFW.GLFW_KEY_MINUS && search.length() < 40) {
+                search += "-";
+            } else {
+                return super.keyPressed(input);
+            }
             scroll = 0; return true;
         }
         if (key == GLFW.GLFW_KEY_TAB) { settingsOpen = !settingsOpen; return true; }
         return super.keyPressed(input);
-    }
-
-    @Override
-    public boolean charTyped(net.minecraft.client.input.CharacterEvent input) {
-        if (searchFocused) {
-            String value = input.codepointAsString();
-            if (value != null && !value.isEmpty() && value.codePoints().noneMatch(Character::isISOControl) && search.length() < 40) {
-                search += value; scroll = 0; return true;
-            }
-        }
-        return super.charTyped(input);
     }
 
     @Override
