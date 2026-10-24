@@ -23,7 +23,7 @@ public class BaronScreen extends Screen {
     private static final String[] CATEGORIES = {"All Modules", "Combat", "HUD", "Render", "Utility"};
     private String category = "All Modules";
     private boolean compact = false;
-    private boolean settingsOpen = true;
+    private boolean settingsOpen = false;
     private boolean waitingForKey = false;
     private Module selected;
     private int scroll = 0;
@@ -39,7 +39,7 @@ public class BaronScreen extends Screen {
     private int left() { return (width - panelW()) / 2; }
     private int top() { return (height - panelH()) / 2; }
     private int sidebarW() { return 164; }
-    private int settingsW() { return settingsOpen ? 232 : 0; }
+    private int settingsW() { return settingsOpen ? Math.min(232, Math.max(168, panelW() - sidebarW() - 220)) : 0; }
     private int contentLeft() { return left() + sidebarW() + 20; }
     private int contentRight() { return left() + panelW() - settingsW() - 20; }
 
@@ -116,10 +116,10 @@ public class BaronScreen extends Screen {
                 cx + 92, listY, MUTED);
 
         int gridTop = listY + 20;
-        int availableW = Math.max(180, cw);
+        int availableW = Math.max(1, cw);
         int gap = 9;
         int columns = compact ? 1 : (availableW >= 460 ? 2 : 1);
-        int cardW = Math.max(150, (availableW - gap * (columns - 1)) / columns);
+        int cardW = Math.max(1, (availableW - gap * (columns - 1)) / columns);
         int cardH = compact ? 46 : 62;
         int visibleRows = Math.max(1, (y + h - 26 - gridTop) / (cardH + gap));
         List<Module> mods = filtered();
@@ -229,8 +229,8 @@ public class BaronScreen extends Screen {
             if (client != null) client.setScreen(new HudEditorScreen()); return true;
         }
 
-        int listY = y + 124 + offset;
-        int gridTop = listY;
+        int listY = y + 104 + offset;
+        int gridTop = listY + 20;
         int availableW = Math.max(180, cw);
         int gap = 9, columns = compact ? 1 : (availableW >= 460 ? 2 : 1);
         int cardW = Math.max(150, (availableW - gap * (columns - 1)) / columns);
