@@ -99,9 +99,9 @@ public class BaronScreen extends Screen {
 
         int gridY = y + 101 + off;
         int gap = 7;
-        int columns = contentW >= 520 ? 5 : contentW >= 390 ? 4 : contentW >= 280 ? 3 : 2;
+        int columns = contentW >= 620 ? 5 : contentW >= 450 ? 4 : contentW >= 300 ? 3 : 2;
         int cardW = Math.max(54, (contentW - gap * (columns - 1)) / columns);
-        int cardH = Math.max(56, Math.min(72, (h - 130) / 3));
+        int cardH = 66;
         int rowsVisible = Math.max(1, (y + h - 13 - gridY) / (cardH + gap));
         int maxScroll = Math.max(0, (mods.size() + columns - 1) / columns - rowsVisible);
         scroll = Math.max(0, Math.min(scroll, maxScroll));
@@ -115,14 +115,12 @@ public class BaronScreen extends Screen {
             boolean hover = inside(mouseX, mouseY, mx, my, cardW, cardH);
             d.fill(mx, my, mx + cardW, my + cardH, hover ? 0xFF292A33 : CARD);
             d.fill(mx, my, mx + cardW, my + 2, m.enabled ? 0xFF4DCA75 : 0xFF34343E);
-            d.drawTextWithShadow(textRenderer, Text.literal(iconFor(m.name)), mx + cardW / 2 - 5, my + 9, 0xFFE8E8EE);
+            d.drawCenteredTextWithShadow(textRenderer, Text.literal(iconFor(m.name)), mx + cardW / 2, my + 7, 0xFFE8E8EE);
             String name = m.name.length() > Math.max(8, cardW / 6) ? m.name.substring(0, Math.max(5, cardW / 6 - 1)) + "…" : m.name;
-            d.drawCenteredTextWithShadow(textRenderer, Text.literal(name), mx + cardW / 2, my + 26, 0xFFF0F0F4);
-            d.drawCenteredTextWithShadow(textRenderer, Text.literal(m.enabled ? "ENABLED" : "DISABLED"),
-                    mx + cardW / 2, my + 39, m.enabled ? 0xFF62D783 : MUTED);
-            d.fill(mx + 5, my + cardH - 14, mx + cardW - 5, my + cardH - 5, m.enabled ? 0xFF174C25 : 0xFF24252C);
+            d.drawCenteredTextWithShadow(textRenderer, Text.literal(name), mx + cardW / 2, my + 25, 0xFFF0F0F4);
+            d.fill(mx + 5, my + cardH - 17, mx + cardW - 5, my + cardH - 5, m.enabled ? 0xFF174C25 : 0xFF24252C);
             d.drawCenteredTextWithShadow(textRenderer, Text.literal(m.enabled ? "ON" : "OFF"),
-                    mx + cardW / 2, my + cardH - 12, m.enabled ? 0xFF9BEBA9 : MUTED);
+                    mx + cardW / 2, my + cardH - 14, m.enabled ? 0xFF9BEBA9 : MUTED);
             d.drawTextWithShadow(textRenderer, Text.literal("⚙"), mx + cardW - 11, my + 4, MUTED);
             if (selected == m) d.fill(mx + 3, my + cardH - 2, mx + cardW - 3, my + cardH - 1, RED);
         }
@@ -188,9 +186,9 @@ public class BaronScreen extends Screen {
 
         int contentX = x + 14 + off, contentW = w - 28;
         int gridY = y + 101 + off, gap = 7;
-        int columns = contentW >= 520 ? 5 : contentW >= 390 ? 4 : contentW >= 280 ? 3 : 2;
+        int columns = contentW >= 620 ? 5 : contentW >= 450 ? 4 : contentW >= 300 ? 3 : 2;
         int cardW = Math.max(54, (contentW - gap * (columns - 1)) / columns);
-        int cardH = Math.max(56, Math.min(72, (h - 130) / 3));
+        int cardH = 66;
         int rowsVisible = Math.max(1, (y + h - 13 - gridY) / (cardH + gap));
         List<Module> mods = filtered();
         int maxScroll = Math.max(0, (mods.size() + columns - 1) / columns - rowsVisible);
