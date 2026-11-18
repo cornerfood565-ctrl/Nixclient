@@ -23,13 +23,15 @@ public final class ModuleManager {
     public static void init() {
         if (!modules.isEmpty()) return;
         String[][] defs = {
-            {"CPS Counter","Combat","true"},{"Keystrokes","Combat","true"},{"Hit Indicator","Combat","true"},
-            {"Custom Crosshair","Render","true"},{"Damage Flash","Render","true"},{"Fullbright","Render","false"},
-            {"Item Physics","Render","false"},{"Motion Blur","Render","false"},
-            {"FPS","HUD","true"},{"Coordinates","HUD","true"},{"Ping","HUD","true"},
-            {"Potion Effects","HUD","true"},{"Armor HUD","HUD","true"},{"Boss Bar","HUD","true"},
-            {"Scoreboard","HUD","true"},{"Direction","HUD","false"},{"Clock","HUD","false"},{"Memory","HUD","false"},
-            {"Performance Mode","Utility","false"},{"Particles","Utility","true"},{"Animations","Utility","true"}
+            {"FPS Counter","HUD","true"},{"Coordinates","HUD","false"},{"Direction","HUD","false"},
+            {"Clock","HUD","false"},{"Memory Usage","HUD","false"},{"Biome Display","HUD","true"},
+            {"Resource Packs","HUD","false"},{"Server Info","HUD","false"},{"Ping","HUD","false"},
+            {"Server TPS","HUD","false"},{"Day Counter","HUD","false"},{"Speed","HUD","false"},
+            {"Fullbright","Render","false"},{"Cape","Render","false"},{"Custom Sky","Render","false"},
+            {"Entity Hider","Render","false"},{"Item Physics","Render","false"},
+            {"Sprint","Movement","false"},{"NoFall","Movement","false"},{"Fly","Movement","false"},{"Step","Movement","false"},
+            {"AutoHeal","Player","false"},{"Reach Display","Player","false"},{"Armor Status","Player","false"},{"Potion HUD","Player","false"},
+            {"Auto GG","Utility","false"},{"Chat Filter","Utility","false"},{"Screenshot","Utility","false"},{"FPS Boost","Utility","false"}
         };
         for (String[] d : defs) modules.add(new Module(d[0], d[1], Boolean.parseBoolean(d[2])));
         configPath = MinecraftClient.getInstance().runDirectory.toPath().resolve("config").resolve("baronclient.properties");
